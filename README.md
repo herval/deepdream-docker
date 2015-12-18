@@ -11,7 +11,7 @@ The only dependency you need is [Docker](https://www.docker.com/).
 ## Running
 
 ```
-docker run -i -t -e INPUT=your_file.png -v /path/to/your/folder:/data herval/deepdream
+docker run -i -t -e INPUT=your_file.png -e ITER=20 -e SCALE=0.10 -e MODEL='inception_3b/5x5_reduce' -v /path/to/your/folder:/data herval/deepdream
 ```
 
 Replace  `/path/to/your/folder` to the folder where your `INPUT` file is. That's also where the output will be written to.

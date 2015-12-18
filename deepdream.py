@@ -20,6 +20,19 @@ def showarray(a):
     PIL.Image.fromarray(np.uint8(a)).save(filename)
 
 input_file = os.getenv('INPUT', 'input.png')
+iterations = os.getenv('ITER', 50)
+try:
+    iterations = int(iterations)
+except ValueError:
+    iterations = 50
+
+scale = os.getenv('SCALE', 0.05)
+try:
+    scale = float(scale)
+except ValueError:
+    scale = 0.05
+
+model_name = os.getenv('MODEL', 'inception_4c/output')
 print "Processing file: " + input_file
 
 img = np.float32(PIL.Image.open('/data/%s' % input_file))
@@ -80,7 +93,7 @@ def deepdream(net, base_img, iter_n=10, octave_n=4, octave_scale=1.4, end='incep
         src.data[0] = octave_base+detail
         for i in xrange(iter_n):
             make_step(net, end=end, clip=clip, **step_params)
-            
+
             # visualization
             vis = deprocess(net, src.data[0])
             if not clip: # adjust image contrast if clipping is disabled
@@ -93,6 +106,21 @@ def deepdream(net, base_img, iter_n=10, octave_n=4, octave_scale=1.4, end='incep
     # returning the resulting image
     return deprocess(net, src.data[0])
 
+def verifyModel(net, model):
+    print "Verifying model: %s" % model
+    keys = net.blobs.keys()
+    if model in keys:
+        print "Model %s is valid." %model
+        return True
+    else:
+        print "Invalid model: %s.  Valid models are:" % model
+        for k in keys:
+            print k
+        return False
+
+if not verifyModel(net, model_name):
+    os._exit(1)
+
 if not os.path.exists("/data/output"):
   os.mkdir("/data/output")
 
@@ -100,24 +128,29 @@ if not os.path.exists("/data/output/tmp"):
   os.mkdir("/data/output/tmp")
 
 print "This might take a little while..."
-
+print "Generating first sample..."
 step_one = deepdream(net, img)
 PIL.Image.fromarray(np.uint8(step_one)).save("/data/output/step_one.jpg")
 
+print "Generating second sample..."
 step_two = deepdream(net, img, end='inception_3b/5x5_reduce')
 PIL.Image.fromarray(np.uint8(step_two)).save("/data/output/step_two.jpg")
-
-net.blobs.keys()
 
 frame = img
 frame_i = 0
 
 h, w = frame.shape[:2]
-s = 0.05 # scale coefficient
-for i in xrange(100):
-    frame = deepdream(net, frame)
+s = float(scale) # scale coefficient
+print "Entering dream mode..."
+print "Iterations = %s" % iterations
+print "Scale = %s" % scale
+print "Model = %s" % model_name
+for i in xrange(int(iterations)):
+    print "Step %d of %d is starting..." % (i, int(iterations))
+    frame = deepdream(net, frame, end=model_name)
     PIL.Image.fromarray(np.uint8(frame)).save("/data/output/%04d.jpg"%frame_i)
     frame = nd.affine_transform(frame, [1-s,1-s,1], [h*s/2,w*s/2,0], order=1)
     frame_i += 1
+    print "Step %d of %d is complete." % (i, int(iterations))
 
 print "All done! Check the /output folder for results"
