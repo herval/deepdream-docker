@@ -8,6 +8,13 @@ A Docker Container to run Google's [Deepdream](https://github.com/google/deepdre
 The only dependency you need is [Docker](https://www.docker.com/).
 
 
+## Building locally
+
+```
+docker build -t herval/deepdream .
+```
+
+
 ## Running
 
 ```
