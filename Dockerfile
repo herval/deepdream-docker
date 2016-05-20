@@ -14,6 +14,7 @@ RUN apt-get install -y python python-dev python-pip python-numpy python-scipy
 RUN git clone https://github.com/BVLC/caffe.git /caffe
 WORKDIR /caffe
 RUN cp Makefile.config.example Makefile.config
+RUN easy_install --upgrade pip
 
 # Enable CPU-only + openblas (faster than atlas)
 RUN sed -i 's/# CPU_ONLY/CPU_ONLY/g' Makefile.config
