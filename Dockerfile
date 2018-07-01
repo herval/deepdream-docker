@@ -8,6 +8,7 @@ RUN apt-get install -y libprotobuf-dev libleveldb-dev libsnappy-dev libopencv-de
 
 # Python + pip
 RUN apt-get install -y python python-dev python-pip python-numpy python-scipy
+RUN pip install numpy --upgrade
 
 
 # Caffe
